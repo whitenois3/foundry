@@ -1390,6 +1390,11 @@ impl EthApi {
         }
     }
 
+    pub async fn anvil_catchup_block_number(&self) -> Result<()> {
+        node_info!("anvil_catchup_block_number");
+        self.backend.catchup_block_number().await
+    }
+
     /// Modifies the balance of an account.
     ///
     /// Handler for RPC call: `anvil_setBalance`

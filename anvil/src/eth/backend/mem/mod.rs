@@ -290,6 +290,15 @@ impl Backend {
         get_precompiles_for(self.env().read().cfg.spec_id)
     }
 
+    pub async fn catchup_block_number(&self) -> Result<(), BlockchainError> {
+        if let Some(fork) = self.get_fork() {
+            fork.catchup_to(BlockNumber::Latest).await?;
+            Ok(())
+        } else {
+            Err(RpcError::invalid_params("Forking not enabled").into())
+        }
+    }
+
     /// Resets the fork to a fresh state
     pub async fn reset_fork(&self, forking: Forking) -> Result<(), BlockchainError> {
         if let Some(fork) = self.get_fork() {

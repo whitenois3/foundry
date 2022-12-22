@@ -45,6 +45,30 @@ impl ClientFork {
         Self { storage: Default::default(), config: Arc::new(RwLock::new(config)), database }
     }
 
+    pub async fn catchup_to(
+        &self,
+        block_number: impl Into<BlockId>,
+    ) -> Result<(), BlockchainError> {
+        let block_number = block_number.into();
+        let provider = self.provider();
+        let block =
+            provider.get_block(block_number).await?.ok_or(BlockchainError::BlockNotFound)?;
+        let block_hash = block.hash.ok_or(BlockchainError::BlockNotFound)?;
+        let timestamp = block.timestamp.as_u64();
+        let base_fee = block.base_fee_per_gas;
+        let total_difficulty = block.total_difficulty.unwrap_or_default();
+
+        self.config.write().update_block(
+            block.number.ok_or(BlockchainError::BlockNotFound)?.as_u64(),
+            block_hash,
+            timestamp,
+            base_fee,
+            total_difficulty,
+        );
+
+        Ok(())
+    }
+
     /// Reset the fork to a fresh forked state, and optionally update the fork config
     pub async fn reset(
         &self,
