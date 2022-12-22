@@ -292,7 +292,43 @@ impl Backend {
 
     pub async fn catchup_block_number(&self) -> Result<(), BlockchainError> {
         if let Some(fork) = self.get_fork() {
-            fork.catchup_to(BlockNumber::Latest).await?;
+            let block_number = BlockNumber::Latest;
+            fork.reset(Some(fork.config.read().eth_rpc_url.clone()), block_number).await?;
+            let fork_block_number = fork.block_number();
+            let fork_block = fork
+                .block_by_number(fork_block_number)
+                .await?
+                .ok_or(BlockchainError::BlockNotFound)?;
+            // update all settings related to the forked block
+            {
+                let mut env = self.env.write();
+                env.cfg.chain_id = fork.chain_id().into();
+
+                env.block = BlockEnv {
+                    number: fork_block_number.into(),
+                    timestamp: fork_block.timestamp,
+                    gas_limit: fork_block.gas_limit,
+                    difficulty: fork_block.difficulty,
+                    prevrandao: fork_block.mix_hash,
+                    // Keep previous `coinbase` and `basefee` value
+                    coinbase: env.block.coinbase,
+                    basefee: env.block.basefee,
+                };
+
+                self.time.reset(env.block.timestamp.as_u64());
+                self.fees.set_base_fee(env.block.basefee);
+
+                // also reset the total difficulty
+                self.blockchain.storage.write().total_difficulty = fork.total_difficulty();
+            }
+
+            // // reset storage
+            // *self.blockchain.storage.write() = BlockchainStorage::forked(
+            //     fork.block_number(),
+            //     fork.block_hash(),
+            //     fork.total_difficulty(),
+            // );
+
             Ok(())
         } else {
             Err(RpcError::invalid_params("Forking not enabled").into())
