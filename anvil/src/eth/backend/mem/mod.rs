@@ -323,11 +323,11 @@ impl Backend {
             }
 
             // // reset storage
-            // *self.blockchain.storage.write() = BlockchainStorage::forked(
-            //     fork.block_number(),
-            //     fork.block_hash(),
-            //     fork.total_difficulty(),
-            // );
+            *self.blockchain.storage.write() = BlockchainStorage::forked(
+                fork.block_number(),
+                fork.block_hash(),
+                fork.total_difficulty(),
+            );
 
             Ok(())
         } else {
