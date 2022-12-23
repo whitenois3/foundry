@@ -242,6 +242,12 @@ casttest!(cast_run_succeeds, |_: TestProject, mut cmd: TestCommand| {
 
 // tests that the `cast storage` command works correctly
 casttest!(test_live_cast_storage_succeeds, |_: TestProject, mut cmd: TestCommand| {
+    // ignore if ETHERSCAN_API_KEY not set
+    if std::env::var("ETHERSCAN_API_KEY").is_err() {
+        eprintln!("ETHERSCAN_API_KEY not set");
+        return
+    }
+
     let eth_rpc_url = next_http_rpc_endpoint();
 
     // WETH
@@ -303,4 +309,30 @@ casttest!(cast_to_base, |_: TestProject, mut cmd: TestCommand| {
             }
         }
     }
+});
+
+// tests that revert reason is only present if transaction has reverted.
+casttest!(cast_receipt_revert_reason, |_: TestProject, mut cmd: TestCommand| {
+    let rpc = next_http_rpc_endpoint();
+
+    // <https://etherscan.io/tx/0x44f2aaa351460c074f2cb1e5a9e28cbc7d83f33e425101d2de14331c7b7ec31e>
+    cmd.cast_fuse().args([
+        "receipt",
+        "0x44f2aaa351460c074f2cb1e5a9e28cbc7d83f33e425101d2de14331c7b7ec31e",
+        "--rpc-url",
+        rpc.as_str(),
+    ]);
+    let output = cmd.stdout_lossy();
+    assert!(!output.contains("revertReason"));
+
+    // <https://etherscan.io/tx/0x0e07d8b53ed3d91314c80e53cf25bcde02084939395845cbb625b029d568135c>
+    cmd.cast_fuse().args([
+        "receipt",
+        "0x0e07d8b53ed3d91314c80e53cf25bcde02084939395845cbb625b029d568135c",
+        "--rpc-url",
+        rpc.as_str(),
+    ]);
+    let output = cmd.stdout_lossy();
+    assert!(output.contains("revertReason"));
+    assert!(output.contains("Transaction too old"));
 });
