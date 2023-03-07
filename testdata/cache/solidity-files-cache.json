@@ -1153,6 +1153,52 @@
         }
       }
     },
+    "cheats/MemSafety.t.sol": {
+      "lastModificationDate": 1678152792119,
+      "contentHash": "16eeda825f56df335a8cc99087d3c375",
+      "sourceName": "cheats/MemSafety.t.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "cheats/Cheats.sol",
+        "lib/ds-test/src/test.sol"
+      ],
+      "versionRequirement": ">=0.8.0",
+      "artifacts": {
+        "MemSafetyTest": {
+          "0.8.16+commit.07a7930e.Darwin.appleclang": "MemSafety.t.sol/MemSafetyTest.json"
+        },
+        "SubContext": {
+          "0.8.16+commit.07a7930e.Darwin.appleclang": "MemSafety.t.sol/SubContext.json"
+        }
+      }
+    },
     "cheats/MockCall.t.sol": {
       "lastModificationDate": 1661330493213,
       "contentHash": "c4cfce5e641637fcf77309657da735a7",
