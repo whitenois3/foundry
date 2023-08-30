@@ -475,13 +475,6 @@ async fn main() -> Result<()> {
                 }
             }
         }
-        Subcommands::EtherscanAbi { address, etherscan } => {
-            let config = Config::from(&etherscan);
-            let chain = config.chain_id.unwrap_or_default();
-            let api_key = config.get_etherscan_api_key(Some(chain)).unwrap_or_default();
-            let chain = chain.named()?;
-            println!("{}", SimpleCast::etherscan_abi(chain, address, api_key).await?);
-        }
         Subcommands::Create2(cmd) => {
             cmd.run()?;
         }
