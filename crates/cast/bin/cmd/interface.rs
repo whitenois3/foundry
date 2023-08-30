@@ -33,14 +33,23 @@ pub struct InterfaceArgs {
     )]
     output: Option<PathBuf>,
 
+    #[clap(long, short)]
+    json: bool,
+
     #[clap(flatten)]
     etherscan: EtherscanOpts,
 }
 
 impl InterfaceArgs {
     pub async fn run(self) -> Result<()> {
-        let InterfaceArgs { path_or_address, name, pragma, output: output_location, etherscan } =
-            self;
+        let InterfaceArgs {
+            path_or_address,
+            name,
+            pragma,
+            output: output_location,
+            etherscan,
+            json,
+        } = self;
         let config = Config::from(&etherscan);
         let chain = config.chain_id.unwrap_or_default();
         let source = if Path::new(&path_or_address).exists() {
@@ -51,6 +60,13 @@ impl InterfaceArgs {
             AbiPath::Etherscan { chain, api_key, address: path_or_address.parse()? }
         };
         let interfaces = SimpleCast::generate_interface(source).await?;
+
+        if json {
+            for interface in &interfaces {
+                println!("{}", interface.json_abi);
+            }
+            return Ok(())
+        }
 
         // put it all together
         let pragma = format!("pragma solidity {pragma};");
