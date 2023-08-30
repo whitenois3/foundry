@@ -1717,6 +1717,33 @@ impl SimpleCast {
         Ok(metadata.source_code())
     }
 
+    /// Fetches the JSON ABI of verified contracts from etherscan.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use cast::SimpleCast as Cast;
+    /// # use ethers_core::types::Chain;
+    ///
+    /// # async fn foo() -> eyre::Result<()> {
+    ///     let contract_abi = include_str("./abi.json");
+    ///     assert_eq!(
+    ///         contract_abi,
+    ///         Cast::etherscan_abi(Chain::Mainnet, "0xBB9bc244D798123fDe783fCc1C72d3Bb8C189413".to_string(), "<etherscan_api_key>".to_string()).await.unwrap().as_str()
+    ///     );
+    /// #    Ok(())
+    /// # }
+    /// ```
+    pub async fn etherscan_abi(
+        chain: Chain,
+        contract_address: String,
+        etherscan_api_key: String,
+    ) -> Result<String> {
+        let client = Client::new(chain, etherscan_api_key)?;
+        let metadata = client.contract_abi(contract_address.parse()?).await?;
+        Ok(serde_json::to_string_pretty(&metadata)?)
+    }
+
     /// Fetches the source code of verified contracts from etherscan and expands the resulting
     /// files to a directory for easy perusal.
     ///

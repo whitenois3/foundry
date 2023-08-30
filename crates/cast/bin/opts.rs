@@ -786,6 +786,15 @@ pub enum Subcommands {
         etherscan: EtherscanOpts,
     },
 
+    #[clap(name = "abi", visible_aliases = &["ea"])]
+    #[clap(about = "Get the JSON ABI of a contract from Etherscan.")]
+    EtherscanAbi {
+        #[clap(value_name = "ADDRESS")]
+        address: String,
+        #[clap(flatten)]
+        etherscan: EtherscanOpts,
+    },
+
     /// Wallet management utilities.
     #[clap(visible_alias = "w")]
     Wallet {
